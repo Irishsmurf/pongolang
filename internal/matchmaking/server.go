@@ -38,7 +38,7 @@ type Server struct {
 // NewServer creates a new matchmaking server instance
 func NewServer(cfg Config) *Server {
 	if cfg.GameServerAddress == "" {
-		cfg.GameServerAddress = "localhost:10050" // Default game server address
+		cfg.GameServerAddress = "localhost:10052" // Default game server address
 		log.Printf("Warning: GameServerAddress not specified, using default: %s", cfg.GameServerAddress)
 	}
 	return &Server{
