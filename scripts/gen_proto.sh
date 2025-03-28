@@ -19,14 +19,15 @@ echo "Removing old generated code..."
 rm -rf "${PROJECT_ROOT}/api/gen/go" # Remove old Go generated code completely
 rm -rf "${JS_OUT_DIR}/*"            # Clear JS output dir
 
+# Go generation block in scripts/gen_proto.sh
 echo "Generating Go code..."
 protoc \
-  --proto_path="${PROTO_SRC_DIR}" \
-  --go_out="${GO_OUT_DIR}" \
-  --go-grpc_out="${GO_OUT_DIR}" \
-  "${PROTO_SRC_DIR}/metadata/metadata.proto" \
-  "${PROTO_SRC_DIR}/matchmaking/matchmaking.proto" \
-  "${PROTO_SRC_DIR}/game/game.proto"
+  --proto_path=api/proto \
+  --go_out=./ \
+  --go-grpc_out=./ \
+  api/proto/metadata/metadata.proto \
+  api/proto/matchmaking/matchmaking.proto \
+  api/proto/game/game.proto
 
 echo "Generating gRPC-Web (JavaScript/TypeScript) code..."
 protoc \
