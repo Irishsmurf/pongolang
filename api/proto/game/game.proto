@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package game;
+
+option go_package = "github.com/Irishsmurf/pongolang/api/gen/go/game;game_pb";
+
+// Basic 2D vector
+message Vector2 {
+  float x = 1;
+  float y = 2;
+}
+
+// Represents the state of a paddle
+message PaddleState {
+  string player_id = 1;
+  Vector2 position = 2; // Center or top position of the paddle
+  // Could add width/height if variable, otherwise assume fixed on client/server
+}
+
+// Represents the state of the ball
+message BallState {
+  Vector2 position = 1;
+  Vector2 velocity = 2;
+}
+
+// Represents the current scores
+message ScoreState {
+  int32 player1_score = 1; // Score associated with player1_id in GameState
+  int32 player2_score = 2; // Score associated with player2_id in GameState
+}
+
+// Snapshot of the entire game state at a point in time
+message GameState {
+  string match_id = 1;
+  BallState ball = 2;
+  PaddleState player1_paddle = 3; // State for player 1
+  PaddleState player2_paddle = 4; // State for player 2
+  ScoreState score = 5;
+  string player1_id = 6; // ID for player 1 (useful for client to know which paddle is theirs)
+  string player2_id = 7; // ID for player 2
+  // Could add game status (e.g., WAITING, RUNNING, PAUSED, FINISHED)
+}
+
+// Specific events that occur during the game
+message GameEvent {
+  oneof event_type {
+    ScoreUpdate score_update = 1; // Sent when a point is scored
+    GameOver game_over = 2;       // Sent when the game ends
+    // Could add PlayerDisconnect event
+  }
+
+  message ScoreUpdate {
+    ScoreState new_score = 1;
+    string scoring_player_id = 2; // ID of the player who just scored
+  }
+
+  message GameOver {
+    string winner_player_id = 1;
+    string loser_player_id = 2;
+    ScoreState final_score = 3;
+  }
+}
+
+// Messages sent from the client to the game server
+message ClientToServer {
+  oneof message_type {
+    InitialConnect connect_request = 1; // First message sent by client on connection
+    PaddleInput input = 2;              // Subsequent messages for paddle movement
+  }
+
+  message InitialConnect {
+    string player_id = 1;
+    string match_id = 2; // To ensure connecting to the correct game instance
+  }
+
+  message PaddleInput {
+    enum Direction {
+      DIRECTION_UNSPECIFIED = 0;
+      STOP = 1;
+      UP = 2;
+      DOWN = 3;
+    }
+    Direction direction = 1;
+    // No need for player_id here if using InitialConnect to identify stream
+  }
+}
+
+// Messages sent from the game server to the client
+message ServerToClient {
+  oneof message_type {
+    GameState state_update = 1; // Periodic full state update
+    GameEvent event = 2;        // Significant game events
+    // Could add initial GameSetup message confirming connection success
+  }
+}
+
+// Service definition for playing the game
+service GameService {
+  // Bi-directional stream for real-time game communication.
+  // Client sends InitialConnect first, then PaddleInput messages.
+  // Server sends GameState updates and GameEvent messages.
+  rpc StreamGame(stream ClientToServer) returns (stream ServerToClient);
+}

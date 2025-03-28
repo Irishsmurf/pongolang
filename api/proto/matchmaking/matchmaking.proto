@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package matchmaking;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/Irishsmurf/pongolang/api/gen/go/matchmaking;matchmaking_pb";
+
+// Status updates streamed back to the client after joining the queue
+message QueueUpdate {
+  // Enum defining the possible states while waiting in the queue
+  enum Status {
+    STATUS_UNSPECIFIED = 0; // Default value, should not be used
+    WAITING_FOR_PLAYER = 1; // Client is in the queue, waiting for an opponent
+    MATCH_FOUND = 2;        // An opponent was found, details included
+    QUEUE_TIMEOUT = 3;      // No match found within a time limit (optional)
+    QUEUE_ERROR = 4;        // An internal error occurred
+  }
+
+  Status status = 1;                // Current status of the queue request
+  optional MatchDetails details = 2; // Included only when status is MATCH_FOUND
+  string message = 3;               // Optional informational message (e.g., "Waiting...", "Error details")
+}
+
+// Details of a found match
+message MatchDetails {
+  string match_id = 1;            // Unique identifier for this specific match session
+  string player1_id = 2;          // ID of the first player
+  string player2_id = 3;          // ID of the second player
+  string game_server_address = 4; // Network address (host:port) of the GameServer assigned to this match
+}
+
+// Service definition for matchmaking
+service MatchmakingService {
+  // Player requests to join the matchmaking queue.
+  // Returns a stream of status updates. The stream closes when a match is
+  // found, the player leaves, times out, or an error occurs.
+  rpc JoinQueue(JoinQueueRequest) returns (stream QueueUpdate);
+
+  // Player requests to leave the matchmaking queue.
+  rpc LeaveQueue(LeaveQueueRequest) returns (google.protobuf.Empty);
+}
+
+// Request message for JoinQueue RPC
+message JoinQueueRequest {
+  string player_id = 1; // ID of the player joining the queue
+}
+
+// Request message for LeaveQueue RPC
+message LeaveQueueRequest {
+  string player_id = 1; // ID of the player leaving the queue
+}
