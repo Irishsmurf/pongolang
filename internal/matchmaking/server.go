@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"sync"
-	"time"
 
 	pb "github.com/Irishsmurf/pongolang/api/gen/go/matchmaking" // Adjust import path if needed
 	"github.com/google/uuid"
@@ -39,7 +38,7 @@ type Server struct {
 // NewServer creates a new matchmaking server instance
 func NewServer(cfg Config) *Server {
 	if cfg.GameServerAddress == "" {
-		cfg.GameServerAddress = "localhost:9092" // Default game server address
+		cfg.GameServerAddress = "localhost:10050" // Default game server address
 		log.Printf("Warning: GameServerAddress not specified, using default: %s", cfg.GameServerAddress)
 	}
 	return &Server{

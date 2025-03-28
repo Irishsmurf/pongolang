@@ -15,8 +15,8 @@ import (
 
 func main() {
 	// --- Configuration Flags ---
-	port := flag.Int("port", 9091, "Port for the matchmaking server to listen on")
-	gameServerAddr := flag.String("game-server", "localhost:9092", "Address (host:port) of the game server")
+	port := flag.Int("port", 10050, "Port for the matchmaking server to listen on")
+	gameServerAddr := flag.String("game-server", "localhost:10050", "Address (host:port) of the game server")
 	flag.Parse()
 
 	listenAddr := fmt.Sprintf(":%d", *port)
